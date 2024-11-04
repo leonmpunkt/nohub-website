@@ -1,0 +1,28 @@
+project:
+  type: website
+  # pre-render:
+  #   - "cp -rnv fotos/. _site/_static"
+
+resources:
+    - "fotos/*"
+    - "pads/*"
+  
+website:
+  title: "nohub live"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - about.qmd
+      - href: LiveSets.qmd
+        text: Live Recordings
+  
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+
+
+

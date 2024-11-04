@@ -1,0 +1,121 @@
+---
+title: "nohub"
+---
+
+```{=html}
+<section id="synth-section">
+    <div id="synth-controls">
+        <div class="claviature">
+            <button class="key" style="background-color: #FF6F61;" onclick="playTone('C')">C</button>
+            <button class="key" style="background-color: #6B8E23;" onclick="playTone('C#')">C#</button>
+            <button class="key" style="background-color: #8A2BE2;" onclick="playTone('D')">D</button>
+            <button class="key" style="background-color: #D2691E;" onclick="playTone('D#')">D#</button>
+            <button class="key" style="background-color: #20B2AA;" onclick="playTone('E')">E</button>
+            <button class="key" style="background-color: #FF6347;" onclick="playTone('F')">F</button>
+            <button class="key" style="background-color: #FFD700;" onclick="playTone('F#')">F#</button>
+            <button class="key" style="background-color: #ADFF2F;" onclick="playTone('G')">G</button>
+            <button class="key" style="background-color: #EE82EE;" onclick="playTone('G#')">G#</button>
+            <button class="key" style="background-color: #FF4500;" onclick="playTone('A')">A</button>
+            <button class="key" style="background-color: #1E90FF;" onclick="playTone('A#')">A#</button>
+            <button class="key" style="background-color: #32CD32;" onclick="playTone('B')">B</button>
+        </div>
+    </div>
+    <div id="synth-output">Sound output will appear here</div>
+</section>
+
+<style>
+    #synth-section {
+        text-align: center;
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+    .claviature {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+    }
+
+    .key {
+        border: none;
+        border-radius: 10px;
+        margin: 0 5px;
+        padding: 15px 20px;
+        cursor: pointer;
+        font-size: 1.2em;
+        box-shadow: 0 5px #2C3E50;
+        transform: rotate(-5deg);
+        transition: transform 0.1s;
+    }
+
+    .key:hover {
+        opacity: 0.8;
+    }
+
+    .key:active {
+        transform: rotate(0deg) scale(0.95);
+        box-shadow: 0 2px #2C3E50;
+    }
+
+    #synth-output img {
+        width: 100%;
+        height: auto;
+        max-height: 60vh;
+        max-width: 70vw;
+        object-fit: contain;
+    }
+</style>
+
+<script>
+    function playTone(note) {
+        const context = new (window.AudioContext || window.webkitAudioContext)();
+        const gainNode = context.createGain();
+
+        gainNode.connect(context.destination);
+        
+        // Load and play the audio buffer from Pad_02.wav
+        fetch('pads/Pad_02.wav')
+            .then(response => response.arrayBuffer())
+            .then(data => context.decodeAudioData(data))
+            .then(buffer => {
+                const source = context.createBufferSource();
+                source.buffer = buffer;
+                source.connect(gainNode);
+                
+                // Adjust playback rate for pitch change
+                const notes = {
+                    'C': 1.0,
+                    'C#': 1.059,
+                    'D': 1.122,
+                    'D#': 1.189,
+                    'E': 1.26,
+                    'F': 1.335,
+                    'F#': 1.414,
+                    'G': 1.498,
+                    'G#': 1.587,
+                    'A': 1.682,
+                    'A#': 1.782,
+                    'B': 1.888
+                };
+                source.playbackRate.value = notes[note];
+                
+                // Apply gain envelope for attack and release
+                const attackTime = 0.2;
+                const releaseTime = 1;
+                gainNode.gain.setValueAtTime(0, context.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.5, context.currentTime + attackTime);
+                source.start(context.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0, context.currentTime + 2 - releaseTime);
+                source.stop(context.currentTime + 1);
+                
+
+                // Display a random image from the "fotos" folder
+                const imageFolder = 'fotos';
+                const randomImage = `${imageFolder}/foto${Math.floor(Math.random() * 6) + 1}.jpeg`;
+                document.getElementById('synth-output').innerHTML = `<img src="${randomImage}" alt="Random note image" style="max-width: 100%; height: auto;">`;
+            })
+            .catch(error => console.error('Error loading audio file:', error));
+    };
+
+</script>
+
+```
